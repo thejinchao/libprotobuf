@@ -20,14 +20,14 @@ Usage
 
 Build Library
 -----
-1. Windows: Run build_win64.py(Visual Studio 2015 and [CMake][] is required)
-1. Linux: Run build_linux.py([clang][] and Unrea Engine Source Code is required)
+1. Windows: Run `build_win64.py` (Visual Studio 2015 and [CMake][] is required)
+1. Linux: Run `build_linux.py` ([clang][] and Unrea Engine Source Code is required)
 
 Reference
 -----
-1. [https://github.com/code4game/libprotobuf]
-1. [https://wiki.unrealengine.com/Standalone_Dedicated_Server]
-1. [https://wiki.unrealengine.com/Linking_Static_Libraries_Using_The_Build_System]
+1. https://github.com/code4game/libprotobuf
+1. https://wiki.unrealengine.com/Standalone_Dedicated_Server
+1. https://wiki.unrealengine.com/Linking_Static_Libraries_Using_The_Build_System
 
 
 [Unreal Engine 4]: https://www.unrealengine.com/
