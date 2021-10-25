@@ -1,3 +1,4 @@
 [submodule "protobuf-source"]
 	path = protobuf-source
 	url = https://github.com/google/protobuf
+	branch = 3.19.x
