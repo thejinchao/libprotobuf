@@ -1,5 +1,5 @@
 // Protocol Buffers - Google's data interchange format
-// Copyright 2014 Google Inc.  All rights reserved.
+// Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,41 +27,46 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#ifndef GOOGLE_PROTOBUF_STUBS_SINGLETON_H__
-#define GOOGLE_PROTOBUF_STUBS_SINGLETON_H__
 
-#include <google/protobuf/stubs/common.h>
-#include <google/protobuf/stubs/once.h>
+// Generates Kotlin code for a given .proto file.
+
+#ifndef GOOGLE_PROTOBUF_COMPILER_JAVA_KOTLIN_GENERATOR_H__
+#define GOOGLE_PROTOBUF_COMPILER_JAVA_KOTLIN_GENERATOR_H__
+
+#include <string>
+
+#include <google/protobuf/compiler/code_generator.h>
+#include <google/protobuf/port_def.inc>
 
 namespace google {
 namespace protobuf {
-namespace internal {
-template<typename T>
-class Singleton {
+namespace compiler {
+namespace java {
+
+// CodeGenerator implementation which generates Kotlin code.  If you create your
+// own protocol compiler binary and you want it to support Kotlin output, you
+// can do so by registering an instance of this CodeGenerator with the
+// CommandLineInterface in your main() function.
+class PROTOC_EXPORT KotlinGenerator : public CodeGenerator {
  public:
-  static T* get() {
-    GoogleOnceInit(&once_, &Singleton<T>::Init);
-    return instance_;
-  }
-  static void ShutDown() {
-    delete instance_;
-    instance_ = NULL;
-  }
+  KotlinGenerator();
+  ~KotlinGenerator() override;
+
+  // implements CodeGenerator ----------------------------------------
+  bool Generate(const FileDescriptor* file, const std::string& parameter,
+                GeneratorContext* context, std::string* error) const override;
+
+  uint64_t GetSupportedFeatures() const override;
+
  private:
-  static void Init() {
-    instance_ = new T();
-  }
-  static ProtobufOnceType once_;
-  static T* instance_;
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(KotlinGenerator);
 };
 
-template<typename T>
-ProtobufOnceType Singleton<T>::once_;
-
-template<typename T>
-T* Singleton<T>::instance_ = NULL;
-}  // namespace internal
+}  // namespace java
+}  // namespace compiler
 }  // namespace protobuf
 }  // namespace google
 
-#endif  // GOOGLE_PROTOBUF_STUBS_SINGLETON_H__
+#include <google/protobuf/port_undef.inc>
+
+#endif  // GOOGLE_PROTOBUF_COMPILER_JAVA_KOTLIN_GENERATOR_H__

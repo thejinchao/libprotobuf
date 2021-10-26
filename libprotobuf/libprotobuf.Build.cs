@@ -1,58 +1,43 @@
-﻿// Jinchao: This file is copy from https://github.com/code4game/libprotobuf
-// Copyright 2016 Code 4 Game. All Rights Reserved.
-
-using UnrealBuildTool;
+﻿using UnrealBuildTool;
+using System;
+using System.IO;
+using System.Collections.Generic;
 
 public class libprotobuf : ModuleRules
 {
-    public libprotobuf(TargetInfo Target)
-    {
-        Type = ModuleType.External;
+	public libprotobuf(ReadOnlyTargetRules Target) : base(Target)
+	{
+		Type = ModuleType.External;
 
-        bool is_supported = false;
-        if (Target.Platform == UnrealTargetPlatform.Win64)
-        {
-            is_supported = true;
+		string protobufPath = ModuleDirectory;
 
-            string protobuf_lib_directory_full_path = System.IO.Path.Combine(ModuleDirectoryFullPath, "lib", "win64");
-            PublicLibraryPaths.Add(protobuf_lib_directory_full_path);
-            PublicAdditionalLibraries.Add("libprotobuf.lib");
-
-            Definitions.AddRange(
-                new string[]
-                {
-                    "WIN64",
-                    "_WINDOWS",
-                    "NDEBUG",
-                    "GOOGLE_PROTOBUF_CMAKE_BUILD",
-                });
-        }
-        else if(Target.Platform == UnrealTargetPlatform.Linux)
-        {
-            is_supported = true;
-
-            string protobuf_lib_directory_full_path = System.IO.Path.Combine(ModuleDirectoryFullPath, "lib", "linux");
-            PublicLibraryPaths.Add(protobuf_lib_directory_full_path);
-            PublicAdditionalLibraries.Add("protobuf");
-
+		bool is_supported = false;
+		if (Target.Platform == UnrealTargetPlatform.Win64)
+		{
+			is_supported = true;
+			PublicAdditionalLibraries.Add(Path.Combine(protobufPath, "lib", "win64", "libprotobuf.lib"));
+			Definitions.AddRange(
+				new string[]{
+					"GOOGLE_PROTOBUF_INTERNAL_DONATE_STEAL_INLINE=0",
+				});
+		}
+		else if(Target.Platform == UnrealTargetPlatform.Linux)
+		{
+			is_supported = true;
+			PublicAdditionalLibraries.Add(Path.Combine(protobufPath, "lib", "linux", "libprotobuf.lib"));
+/*
             Definitions.AddRange(
                 new string[]
                 {
                     "GOOGLE_PROTOBUF_NO_RTTI=1",
                 });
-        }
-        
-        if (is_supported)
-        {
-            string protobuf_code_directory_full_path = System.IO.Path.Combine(ModuleDirectoryFullPath, "include");
+*/				
+		}
 
-            PublicSystemIncludePaths.Add(protobuf_code_directory_full_path);
-        }
-    }
-
-    string ModuleDirectoryFullPath
-    {
-        get { return System.IO.Path.GetFullPath(ModuleDirectory); }
-    }
+		if (is_supported)
+		{
+			PublicSystemIncludePaths.Add(Path.Combine(protobufPath, "include"));
+		}
+	}
 }
 

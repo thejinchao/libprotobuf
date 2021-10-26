@@ -6,10 +6,12 @@ Link the google's `protocol bufffers` library as the third party in [Unreal Engi
 Usage
 -----
 
-1. Import or copy the folder 'libprotobuf' into `<your project>/Source/ThirdParty/libprotobuf`.
+1. Import or copy the folder `libprotobuf` into `<your project>/Source/ThirdParty/libprotobuf`.
 1. Add the libprotobuf as a module into `<your project>.Build.cs`
-  * `PrivateDependencyModuleNames.AddRange(new string[] { "CoreUObject", "Engine", "libprotobuf" });`
-1. Generate two code files (header & source, ex: Message.pb.h & Message.pb.cc) of the protocal by `protoc` for `cpp`. (Ref: [Google's Protocol Buffers][])
+  ```C++
+  PrivateDependencyModuleNames.AddRange(new string[] { "libprotobuf" });
+  ```
+3. Generate two code files (header & source, ex: Message.pb.h & Message.pb.cc) of the protocal by `protoc` for `cpp`. (Ref: [Google's Protocol Buffers][])
 1. Put them into the source directory (`Private` or `Public`) of your project.
 1. Add these line in message cpp file(Mesage.pb.cc)
   ```C++
@@ -26,8 +28,12 @@ Usage
 
 Build Library
 -----
-1. Windows: Run `build_win64.py` (Visual Studio 2017 and [CMake][] is required)
+1. Windows: Run `build_win64.py` (Visual Studio 2019 and [CMake][] is required)
 1. Linux: Run `build_linux.py` ([clang][] and Unrea Engine Source Code is required)
+
+License
+-----
+Use The MIT License.
 
 Reference
 -----

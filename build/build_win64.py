@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 import subprocess
 import os
 import sys
@@ -6,74 +7,70 @@ import shutil
 vs_intermediate     = "_vs_tmp"
 protobuf_src_path   = "../../protobuf-source"
 libprotobuf_path    = "../../libprotobuf"
-prefix_path         = "_prefix"
+install_path         = "_install"
 
+def apply_patch():
+	current_file=os.path.abspath(__file__)
+	patch_file=os.path.join(os.path.dirname(current_file), "patch", "win64", "diff-base-on-3.19.0.diff")
+	print("patch_file=%s" % patch_file)
+
+	source_path = os.path.join(os.path.dirname(os.path.dirname(current_file)), "protobuf-source")
+	print("source_path=%s" % source_path)
+
+	cmd_line = ["git", "apply", patch_file]
+	p = subprocess.Popen(cmd_line, cwd=source_path)
+	p.wait()
+	return p.returncode
+	
 def create_vs_prj():
-    cmd_line = ["cmake", "-G", "Visual Studio 15 2017 Win64"]
-    #install prefix
-    cmd_line.append("-DCMAKE_INSTALL_PREFIX="+os.path.join(os.getcwd(), prefix_path))
-    cmd_line.append("-DCMAKE_CONFIGURATION_TYPES=Release")
-    cmd_line.append("-Dprotobuf_BUILD_TESTS=false")
-    cmd_line.append("-Dprotobuf_MSVC_STATIC_RUNTIME=false")
-    cmd_line.append("-Dprotobuf_WITH_ZLIB=false")
-    cmd_line.append(protobuf_src_path+"/cmake")
-    subprocess.call(cmd_line)
+	cmd_line = ["cmake", "-G", "Visual Studio 16 2019", "-A", "x64"]
+	cmd_line.append("-DCMAKE_INSTALL_PREFIX="+os.path.join(os.getcwd(), install_path))
+	cmd_line.append("-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+	cmd_line.append("-Dprotobuf_BUILD_TESTS=false")
+	cmd_line.append("-Dprotobuf_MSVC_STATIC_RUNTIME=false")
+	cmd_line.append("-Dprotobuf_WITH_ZLIB=false")
+	cmd_line.append(protobuf_src_path+"/cmake")
+	subprocess.call(cmd_line)
 
-
-def get_vs2017_devenv():
-    try:
-        vswhere = os.path.join(os.environ.get('ProgramFiles(x86)'), "Microsoft Visual Studio/Installer/vswhere.exe")
-        vswhere_process = subprocess.Popen([vswhere,'-latest', '-version',  '[15.0,16.0)', '-property', 'installationPath', '-nologo'], shell=False, stdout=subprocess.PIPE)
-        while vswhere_process.poll() is None:
-            line = vswhere_process.stdout.readline().strip().decode("utf-8")
-            devenv_com = os.path.join(line, "Common7/IDE/devenv.com")
-            if(os.path.exists(devenv_com)) :
-                return devenv_com
-            else :
-                print(line)
-                return None
-        return None
-    except:
-        return None
-
-   
 def copy_library():
-    target_include = os.path.join(libprotobuf_path, "include")
-    if(os.path.exists(target_include)):
-        shutil.rmtree(target_include, True)
-    shutil.copytree(os.path.join(prefix_path, "include"), target_include)
-    
-    target_bin = os.path.join(libprotobuf_path, "bin")
-    if(os.path.exists(target_bin)):
-        shutil.rmtree(target_bin, True)
-    shutil.copytree(os.path.join(prefix_path, "bin"), target_bin)
-    
-    target_lib = os.path.join(libprotobuf_path, "lib/win64");
-    if(os.path.exists(target_lib)):
-        shutil.rmtree(target_lib, True)
-    os.makedirs(target_lib)
-    shutil.copy(os.path.join(prefix_path, "lib/libprotobuf.lib"), os.path.join(libprotobuf_path, "lib/win64/libprotobuf.lib"))
-    
+	target_include = os.path.join(libprotobuf_path, "include")
+	if(os.path.exists(target_include)):
+		shutil.rmtree(target_include, True)
+	shutil.copytree(os.path.join(install_path, "include"), target_include)
+	
+	target_bin = os.path.join(libprotobuf_path, "bin")
+	if(os.path.exists(target_bin)):
+		shutil.rmtree(target_bin, True)
+	shutil.copytree(os.path.join(install_path, "bin"), target_bin)
+	
+	target_lib = os.path.join(libprotobuf_path, "lib/win64");
+	if(os.path.exists(target_lib)):
+		shutil.rmtree(target_lib, True)
+	os.makedirs(target_lib)
+	shutil.copy(os.path.join(install_path, "lib/libprotobuf.lib"), os.path.join(libprotobuf_path, "lib/win64/libprotobuf.lib"))
+
 ##################################################
+if __name__ == "__main__":
+	#create intermediate path
+	if not os.path.exists(vs_intermediate):
+		os.mkdir(vs_intermediate)
+		os.chdir(vs_intermediate)
+	else :
+		os.chdir(vs_intermediate)
+		shutil.rmtree(install_path, True)
 
-#create intermediate path
-if os.path.exists(vs_intermediate):
-    shutil.rmtree(vs_intermediate, True)
-os.mkdir(vs_intermediate)
-os.chdir(vs_intermediate)
+	#apply patch
+	if(apply_patch() != 0):
+		print("Can't apply source patch!")
+		exit(-1)
+	
+	#create vs project files
+	create_vs_prj()
 
+	#build vs project 
+	subprocess.call(["cmake", "--build", ".", "--config", "Release", "--target", "INSTALL"])
 
-#create vs project files
-create_vs_prj()
+	#copy library files
+	copy_library()
 
-#build vs project 
-devenv_path = get_vs2017_devenv()
-if(devenv_path is None) :
-    print("Visual Studio 2017 not found!")
-    os._exit(0)
-print("Build protobuf...")    
-subprocess.call([devenv_path, "protobuf.sln", "/Build", "Release|x64", "/Project", "INSTALL"])
-
-
-#copy library files
-copy_library()
+	exit(0)
