@@ -3,6 +3,11 @@ libprotobuf for [Unreal Engine 4][]
 
 Link the google's `protocol bufffers` library as the third party in [Unreal Engine 4][].
 
+Version
+-----
+* UnrealEngine: 4.27.1
+* ProtoBuf: 3.19.0
+
 Usage
 -----
 
@@ -11,20 +16,13 @@ Usage
   ```C++
   PrivateDependencyModuleNames.AddRange(new string[] { "libprotobuf" });
   ```
-3. Generate two code files (header & source, ex: Message.pb.h & Message.pb.cc) of the protocal by `protoc` for `cpp`. (Ref: [Google's Protocol Buffers][])
-1. Put them into the source directory (`Private` or `Public`) of your project.
-1. Add these line in message cpp file(Mesage.pb.cc)
-  ```C++
-  #ifdef _MSC_VER
-  #pragma warning(disable:4125)
-  #endif
-  ```    
-4. Regenerate the code file for [Unreal Engine 4][] by `regenerateforue4.py`.
-    * `python regenerateforue4.py 'the header file'`
-    * ex: `python regenerateforue4.py Message.pb.h`
-    * You should get this information: `Success to regenerate the code for UE4`
-5. Include and use the header file(ex: Message.pb.h) in your `.cpp` file.
-6. That's all.
+
+Compile proto file(s)
+-----
+1. Compile the proto files for [Unreal Engine 4][] by `generate_for_ue4.py`.
+    * `python generate_for_ue4.py --proto_input <proto_file_or_path> --cpp_out <output_path>`
+    * ex: `python generate_for_ue4.py --proto_input Message.proto --cpp_out d:\Prject\Source\ProtoFiles`
+1. Include and use the header file(ex: Message.pb.h) in your `.cpp` file.
 
 Build Library
 -----
@@ -38,11 +36,12 @@ Use The MIT License.
 Reference
 -----
 1. https://github.com/code4game/libprotobuf
-1. https://wiki.unrealengine.com/Standalone_Dedicated_Server
-1. https://wiki.unrealengine.com/Linking_Static_Libraries_Using_The_Build_System
-1. https://wiki.unrealengine.com/Compiling_For_Linux
+1. https://unrealcommunity.wiki/standalone-dedicated-server-i5qjfc27
+1. https://unrealcommunity.wiki/linking-static-libraries-using-the-build-system-1ahhe4vt
+1. https://unrealcommunity.wiki/compiling-for-linux-nutp04d0
+1. https://docs.unrealengine.com/4.27/en-US/SharingAndReleasing/Linux/
 
 [Unreal Engine 4]: https://www.unrealengine.com/
 [Google's Protocol Buffers]: https://developers.google.com/protocol-buffers/
 [CMake]:http://www.cmake.org
-[clang]:https://wiki.unrealengine.com/Compiling_For_Linux
+[clang]:https://docs.unrealengine.com/4.27/en-US/SharingAndReleasing/Linux/GettingStarted/
