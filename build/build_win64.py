@@ -11,7 +11,7 @@ install_path         = "_install"
 
 def apply_patch():
 	current_file=os.path.abspath(__file__)
-	patch_file=os.path.join(os.path.dirname(current_file), "patch", "win64", "diff-base-on-3.19.0.diff")
+	patch_file=os.path.join(os.path.dirname(current_file), "patch", "diff-base-on-3.19.0.diff")
 	print("patch_file=%s" % patch_file)
 
 	source_path = os.path.join(os.path.dirname(os.path.dirname(current_file)), "protobuf-source")

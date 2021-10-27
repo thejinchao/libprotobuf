@@ -95,9 +95,6 @@ namespace internal {
 
 #ifndef NDEBUG
 template <size_t align>
-#ifndef _MSC_VER
-[[noreturn]]
-#endif
 void AlignFail(uintptr_t address) {
   GOOGLE_LOG(FATAL) << "Unaligned (" << align << ") access at " << address;
 }

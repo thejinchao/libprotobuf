@@ -16,22 +16,11 @@ public class libprotobuf : ModuleRules
 		{
 			is_supported = true;
 			PublicAdditionalLibraries.Add(Path.Combine(protobufPath, "lib", "win64", "libprotobuf.lib"));
-			Definitions.AddRange(
-				new string[]{
-					"GOOGLE_PROTOBUF_INTERNAL_DONATE_STEAL_INLINE=0",
-				});
 		}
 		else if(Target.Platform == UnrealTargetPlatform.Linux)
 		{
 			is_supported = true;
-			PublicAdditionalLibraries.Add(Path.Combine(protobufPath, "lib", "linux", "libprotobuf.lib"));
-/*
-            Definitions.AddRange(
-                new string[]
-                {
-                    "GOOGLE_PROTOBUF_NO_RTTI=1",
-                });
-*/				
+			PublicAdditionalLibraries.Add(Path.Combine(protobufPath, "lib", "linux", "libprotobuf.a"));
 		}
 
 		if (is_supported)
