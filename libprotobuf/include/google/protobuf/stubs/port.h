@@ -1,4 +1,4 @@
-// Protocol Buffers - Google's data interchange format
+﻿// Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
 //
@@ -60,7 +60,11 @@
 #ifdef __APPLE__
 #include <machine/endian.h>  // __BYTE_ORDER
 #elif defined(__FreeBSD__)
+#if defined(__ORBIS__) || defined(__PROSPERO__)
+#include <machine/endian.h>  // __BYTE_ORDER
+#else
 #include <sys/endian.h>  // __BYTE_ORDER
+#endif
 #elif (defined(sun) || defined(__sun)) && (defined(__SVR4) || defined(__svr4__))
 #include <sys/isa_defs.h>  // __BYTE_ORDER
 #elif defined(_AIX) || defined(__TOS_AIX__)
@@ -85,7 +89,10 @@
 #elif defined(__APPLE__)
 #include <libkern/OSByteOrder.h>
 #elif defined(__linux__) || defined(__ANDROID__) || defined(__CYGWIN__)
-#include <byteswap.h>  // IWYU pragma: export
+#include <bits/byteswap.h>
+#define bswap_16(x) __bswap_16 (x)
+#define bswap_32(x) __bswap_32 (x)
+#define bswap_64(x) __bswap_64 (x)
 #endif
 
 // Legacy: some users reference these (internal-only) macros even though we

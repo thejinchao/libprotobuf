@@ -1,4 +1,4 @@
-// Copyright (c) 2006, Google Inc.
+﻿// Copyright (c) 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -132,7 +132,7 @@ class GOOGLE_PROTOBUF_CAPABILITY("mutex") PROTOBUF_EXPORT WrappedMutex {
  private:
 #if defined(GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP)
   CallOnceInitializedMutex<CriticalSectionLock> mu_{};
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__ORBIS__) || defined(__PROSPERO__)
   CallOnceInitializedMutex<std::mutex> mu_{};
 #else
   std::mutex mu_{};

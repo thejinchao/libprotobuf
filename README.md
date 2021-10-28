@@ -5,8 +5,10 @@ Link the google's `protocol bufffers` library as the third party in [Unreal Engi
 
 Version
 -----
-* UnrealEngine: 4.27.1
 * ProtoBuf: 3.19.0
+* UnrealEngine: 4.27.1
+* PS4 SDK: 9.008.001
+* PS5 SDK: 4.00.00.43
 
 Usage
 -----
@@ -28,6 +30,8 @@ Build Library
 -----
 1. Windows: Run `build_win64.py` (Visual Studio 2019 and [CMake][] is required)
 1. Linux: Run `build_linux.py` ([clang][] and Unrea Engine Source Code is required)
+1. PS4(Orbis): Run `build_ps4.py`(PS4 SDK and UnrealEngine PS4 Patch is required)
+1. PS5(Prospero): Run `build_ps5.py`(PS5 SDK and UnrealEngine PS5 Patch is required)
 
 License
 -----

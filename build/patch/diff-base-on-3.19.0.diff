@@ -1,8 +1,40 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 51e8478f6..cceb0d569 100644
+index 51e8478f6..40df218fd 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
-@@ -182,7 +182,9 @@ else (protobuf_BUILD_SHARED_LIBS)
+@@ -24,7 +24,8 @@ endif()
+ project(protobuf C CXX)
+ 
+ # Add c++11 flags
+-if (CYGWIN)
++if(__COMPILER_PS4 OR __COMPILER_PS5)
++elseif (CYGWIN)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+ else()
+   set(CMAKE_CXX_STANDARD 11)
+@@ -126,7 +127,9 @@ if (protobuf_DISABLE_RTTI)
+   add_definitions(-DGOOGLE_PROTOBUF_NO_RTTI=1)
+ endif()
+ 
+-find_package(Threads REQUIRED)
++if(NOT (__COMPILER_PS4 OR __COMPILER_PS5))
++  find_package(Threads REQUIRED)
++endif()
+ 
+ set(_protobuf_FIND_ZLIB)
+ if (protobuf_WITH_ZLIB)
+@@ -160,7 +163,9 @@ set(protobuf_LINK_LIBATOMIC false)
+ if (NOT MSVC)
+   include(CheckCXXSourceCompiles)
+   set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+-  set(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -std=c++11)
++  if(NOT (__COMPILER_PS4 OR __COMPILER_PS5))
++    set(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -std=c++11)
++  endif()
+   check_cxx_source_compiles("
+     #include <atomic>
+     int main() {
+@@ -182,7 +187,9 @@ else (protobuf_BUILD_SHARED_LIBS)
    # making programmatic control difficult.  Prefer the functionality in newer
    # CMake versions when available.
    if(CMAKE_VERSION VERSION_GREATER 3.15 OR CMAKE_VERSION VERSION_EQUAL 3.15)
@@ -13,6 +45,28 @@ index 51e8478f6..cceb0d569 100644
    else()
      # In case we are building static libraries, link also the runtime library statically
      # so that MSVCR*.DLL is not required at runtime.
+diff --git a/src/google/protobuf/compiler/importer.cc b/src/google/protobuf/compiler/importer.cc
+index 3bcb0c90c..3033dae40 100644
+--- a/src/google/protobuf/compiler/importer.cc
++++ b/src/google/protobuf/compiler/importer.cc
+@@ -1,4 +1,4 @@
+-// Protocol Buffers - Google's data interchange format
++﻿// Protocol Buffers - Google's data interchange format
+ // Copyright 2008 Google Inc.  All rights reserved.
+ // https://developers.google.com/protocol-buffers/
+ //
+@@ -417,8 +417,10 @@ DiskSourceTree::DiskFileToVirtualFile(const std::string& disk_file,
+   for (int i = 0; i < mapping_index; i++) {
+     if (ApplyMapping(*virtual_file, mappings_[i].virtual_path,
+                      mappings_[i].disk_path, shadowing_disk_file)) {
+-      if (access(shadowing_disk_file->c_str(), F_OK) >= 0) {
++        FILE* fp = fopen(shadowing_disk_file->c_str(), "r");
++        if (fp != nullptr) {
+         // File exists.
++        fclose(fp);
+         return SHADOWED;
+       }
+     }
 diff --git a/src/google/protobuf/descriptor.cc b/src/google/protobuf/descriptor.cc
 index c8ce218a9..edca26843 100644
 --- a/src/google/protobuf/descriptor.cc
@@ -60,6 +114,28 @@ index 1fe639f06..7dc7bce51 100644
    // If one is donated and the other is not, undonate the donated one.
    if (donated && !from_donated) {
      MutableSlow(arena, donated, donating_states, mask);
+diff --git a/src/google/protobuf/io/coded_stream.h b/src/google/protobuf/io/coded_stream.h
+index 45963ef86..9b31bec10 100644
+--- a/src/google/protobuf/io/coded_stream.h
++++ b/src/google/protobuf/io/coded_stream.h
+@@ -1,4 +1,4 @@
+-// Protocol Buffers - Google's data interchange format
++﻿// Protocol Buffers - Google's data interchange format
+ // Copyright 2008 Google Inc.  All rights reserved.
+ // https://developers.google.com/protocol-buffers/
+ //
+@@ -135,7 +135,11 @@
+ #ifdef __APPLE__
+ #include <machine/endian.h>  // __BYTE_ORDER
+ #elif defined(__FreeBSD__)
++#if defined(__ORBIS__) || defined(__PROSPERO__)
++#include <machine/endian.h>  // __BYTE_ORDER
++#else
+ #include <sys/endian.h>  // __BYTE_ORDER
++#endif
+ #elif (defined(sun) || defined(__sun)) && (defined(__SVR4) || defined(__svr4__))
+ #include <sys/isa_defs.h>  // __BYTE_ORDER
+ #elif defined(_AIX) || defined(__TOS_AIX__)
 diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
 index 003f75ac7..ff33eae6f 100644
 --- a/src/google/protobuf/port_def.inc
@@ -94,11 +170,61 @@ index 579eb419d..2f5b0bb7f 100644
 +#if defined(_MSC_VER)
  #pragma warning(pop)
  #endif
+diff --git a/src/google/protobuf/stubs/mutex.h b/src/google/protobuf/stubs/mutex.h
+index c4599913b..8768f15df 100644
+--- a/src/google/protobuf/stubs/mutex.h
++++ b/src/google/protobuf/stubs/mutex.h
+@@ -1,4 +1,4 @@
+-// Copyright (c) 2006, Google Inc.
++﻿// Copyright (c) 2006, Google Inc.
+ // All rights reserved.
+ //
+ // Redistribution and use in source and binary forms, with or without
+@@ -132,7 +132,7 @@ class GOOGLE_PROTOBUF_CAPABILITY("mutex") PROTOBUF_EXPORT WrappedMutex {
+  private:
+ #if defined(GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP)
+   CallOnceInitializedMutex<CriticalSectionLock> mu_{};
+-#elif defined(_WIN32)
++#elif defined(_WIN32) || defined(__ORBIS__) || defined(__PROSPERO__)
+   CallOnceInitializedMutex<std::mutex> mu_{};
+ #else
+   std::mutex mu_{};
+diff --git a/src/google/protobuf/stubs/platform_macros.h b/src/google/protobuf/stubs/platform_macros.h
+index 24799600d..f4a6878d9 100644
+--- a/src/google/protobuf/stubs/platform_macros.h
++++ b/src/google/protobuf/stubs/platform_macros.h
+@@ -122,7 +122,7 @@ GOOGLE_PROTOBUF_PLATFORM_ERROR
+ 
+ #undef GOOGLE_PROTOBUF_PLATFORM_ERROR
+ 
+-#if defined(GOOGLE_PROTOBUF_OS_ANDROID) || defined(GOOGLE_PROTOBUF_OS_IPHONE) || defined(__OpenBSD__)
++#if defined(GOOGLE_PROTOBUF_OS_ANDROID) || defined(GOOGLE_PROTOBUF_OS_IPHONE) || defined(__OpenBSD__) || defined(__ORBIS__) || defined(__PROSPERO__)
+ // Android ndk does not support the __thread keyword very well yet. Here
+ // we use pthread_key_create()/pthread_getspecific()/... methods for
+ // TLS support on android.
 diff --git a/src/google/protobuf/stubs/port.h b/src/google/protobuf/stubs/port.h
-index 045e25d89..9c3fb1309 100644
+index 045e25d89..57cbcab34 100644
 --- a/src/google/protobuf/stubs/port.h
 +++ b/src/google/protobuf/stubs/port.h
-@@ -85,7 +85,10 @@
+@@ -1,4 +1,4 @@
+-// Protocol Buffers - Google's data interchange format
++﻿// Protocol Buffers - Google's data interchange format
+ // Copyright 2008 Google Inc.  All rights reserved.
+ // https://developers.google.com/protocol-buffers/
+ //
+@@ -60,7 +60,11 @@
+ #ifdef __APPLE__
+ #include <machine/endian.h>  // __BYTE_ORDER
+ #elif defined(__FreeBSD__)
++#if defined(__ORBIS__) || defined(__PROSPERO__)
++#include <machine/endian.h>  // __BYTE_ORDER
++#else
+ #include <sys/endian.h>  // __BYTE_ORDER
++#endif
+ #elif (defined(sun) || defined(__sun)) && (defined(__SVR4) || defined(__svr4__))
+ #include <sys/isa_defs.h>  // __BYTE_ORDER
+ #elif defined(_AIX) || defined(__TOS_AIX__)
+@@ -85,7 +89,10 @@
  #elif defined(__APPLE__)
  #include <libkern/OSByteOrder.h>
  #elif defined(__linux__) || defined(__ANDROID__) || defined(__CYGWIN__)

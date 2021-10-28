@@ -1,4 +1,4 @@
-// Protocol Buffers - Google's data interchange format
+﻿// Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
 //
@@ -135,7 +135,11 @@
 #ifdef __APPLE__
 #include <machine/endian.h>  // __BYTE_ORDER
 #elif defined(__FreeBSD__)
+#if defined(__ORBIS__) || defined(__PROSPERO__)
+#include <machine/endian.h>  // __BYTE_ORDER
+#else
 #include <sys/endian.h>  // __BYTE_ORDER
+#endif
 #elif (defined(sun) || defined(__sun)) && (defined(__SVR4) || defined(__svr4__))
 #include <sys/isa_defs.h>  // __BYTE_ORDER
 #elif defined(_AIX) || defined(__TOS_AIX__)
