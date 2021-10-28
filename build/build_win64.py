@@ -3,25 +3,13 @@ import subprocess
 import os
 import sys
 import shutil
+import build_common
 
 vs_intermediate     = "_vs_tmp"
 protobuf_src_path   = "../../protobuf-source"
 libprotobuf_path    = "../../libprotobuf"
 install_path         = "_install"
 
-def apply_patch():
-	current_file=os.path.abspath(__file__)
-	patch_file=os.path.join(os.path.dirname(current_file), "patch", "diff-base-on-3.19.0.diff")
-	print("patch_file=%s" % patch_file)
-
-	source_path = os.path.join(os.path.dirname(os.path.dirname(current_file)), "protobuf-source")
-	print("source_path=%s" % source_path)
-
-	cmd_line = ["git", "apply", patch_file]
-	p = subprocess.Popen(cmd_line, cwd=source_path)
-	p.wait()
-	return p.returncode
-	
 def create_vs_prj():
 	cmd_line = ["cmake", "-G", "Visual Studio 16 2019", "-A", "x64"]
 	cmd_line.append("-DCMAKE_INSTALL_PREFIX="+os.path.join(os.getcwd(), install_path))
@@ -57,10 +45,9 @@ if __name__ == "__main__":
 		os.chdir(vs_intermediate)
 	else :
 		os.chdir(vs_intermediate)
-		shutil.rmtree(install_path, True)
 
 	#apply patch
-	if(apply_patch() != 0):
+	if(build_common.apply_patch() != 0):
 		print("Can't apply source patch!")
 		exit(-1)
 	

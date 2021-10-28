@@ -1,9 +1,11 @@
+#-*- coding: utf-8 -*-
 import subprocess
 import os
 import sys
 import shutil
 import winreg
 from argparse import ArgumentParser
+import build_common
 
 clang_linux_root    = os.path.join(os.environ["LINUX_MULTIARCH_ROOT"], "x86_64-unknown-linux-gnu")
 clang_exe           = clang_linux_root + "/bin/clang.exe"
@@ -106,19 +108,6 @@ libproto_files      = [
 libproto_files1 = [
   protobuf_src_path+"/src/google/protobuf/generated_message_tctable_lite.cc"
 ]
-
-def apply_patch():
-	current_file=os.path.abspath(__file__)
-	patch_file=os.path.join(os.path.dirname(current_file), "patch", "diff-base-on-3.19.0.diff")
-	print("patch_file=%s" % patch_file)
-
-	source_path = os.path.join(os.path.dirname(os.path.dirname(current_file)), "protobuf-source")
-	print("source_path=%s" % source_path)
-
-	cmd_line = ["git", "apply", patch_file]
-	p = subprocess.Popen(cmd_line, cwd=source_path)
-	p.wait()
-	return p.returncode
 
 def get_unreal_source_list():
 	ue_source_list=[]
@@ -245,7 +234,7 @@ if __name__ == "__main__":
 	os.mkdir(clang_intermediate)
 	
 	#apply patch
-	if(apply_patch() != 0):
+	if(build_common.apply_patch() != 0):
 		print("Can't apply source patch!")
 		exit(-1)
 	
@@ -263,4 +252,4 @@ if __name__ == "__main__":
 	copy_library(clang_intermediate, library_path)
 
 	print("Done!")
-	sys.exit(0)
+	exit(0)
