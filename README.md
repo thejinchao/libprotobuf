@@ -30,6 +30,7 @@ Build Library
 -----
 1. Windows: Run `build_win64.py` (Visual Studio 2019 and [CMake][] is required)
 1. Linux: Run `build_linux.py` ([clang][] and Unrea Engine Source Code is required)
+1. Android: Run `build_android.py` (AndroidSDK and AndroidNDK is required)
 1. PS4(Orbis): Run `build_ps4.py`(PS4 SDK and UnrealEngine PS4 Patch is required)
 1. PS5(Prospero): Run `build_ps5.py`(PS5 SDK and UnrealEngine PS5 Patch is required)
 
