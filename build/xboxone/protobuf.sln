@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1684
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "protobuf", "protobuf.vcxproj", "{1AF24312-534D-4E3E-8137-D1E2725CE8EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Durango = Debug|Durango
+		Profile|Durango = Profile|Durango
+		Release|Durango = Release|Durango
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1AF24312-534D-4E3E-8137-D1E2725CE8EC}.Debug|Durango.ActiveCfg = Debug|Durango
+		{1AF24312-534D-4E3E-8137-D1E2725CE8EC}.Debug|Durango.Build.0 = Debug|Durango
+		{1AF24312-534D-4E3E-8137-D1E2725CE8EC}.Profile|Durango.ActiveCfg = Profile|Durango
+		{1AF24312-534D-4E3E-8137-D1E2725CE8EC}.Profile|Durango.Build.0 = Profile|Durango
+		{1AF24312-534D-4E3E-8137-D1E2725CE8EC}.Release|Durango.ActiveCfg = Release|Durango
+		{1AF24312-534D-4E3E-8137-D1E2725CE8EC}.Release|Durango.Build.0 = Release|Durango
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3E62ADFA-1B09-4DBA-961D-82F191D106E0}
+	EndGlobalSection
+EndGlobal
