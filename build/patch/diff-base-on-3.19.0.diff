@@ -46,15 +46,9 @@ index 51e8478f6..40df218fd 100644
      # In case we are building static libraries, link also the runtime library statically
      # so that MSVCR*.DLL is not required at runtime.
 diff --git a/src/google/protobuf/compiler/importer.cc b/src/google/protobuf/compiler/importer.cc
-index 3bcb0c90c..3033dae40 100644
+index 3bcb0c90c..bb5207a20 100644
 --- a/src/google/protobuf/compiler/importer.cc
 +++ b/src/google/protobuf/compiler/importer.cc
-@@ -1,4 +1,4 @@
--// Protocol Buffers - Google's data interchange format
-+﻿// Protocol Buffers - Google's data interchange format
- // Copyright 2008 Google Inc.  All rights reserved.
- // https://developers.google.com/protocol-buffers/
- //
 @@ -417,8 +417,10 @@ DiskSourceTree::DiskFileToVirtualFile(const std::string& disk_file,
    for (int i = 0; i < mapping_index; i++) {
      if (ApplyMapping(*virtual_file, mappings_[i].virtual_path,
@@ -96,15 +90,9 @@ index 3f2b1cabd..86d743002 100644
    GOOGLE_LOG(FATAL) << "Unaligned (" << align << ") access at " << address;
  }
 diff --git a/src/google/protobuf/inlined_string_field.h b/src/google/protobuf/inlined_string_field.h
-index 1fe639f06..7dc7bce51 100644
+index 1fe639f06..e4ab35972 100644
 --- a/src/google/protobuf/inlined_string_field.h
 +++ b/src/google/protobuf/inlined_string_field.h
-@@ -1,4 +1,4 @@
--// Protocol Buffers - Google's data interchange format
-+﻿// Protocol Buffers - Google's data interchange format
- // Copyright 2008 Google Inc.  All rights reserved.
- // https://developers.google.com/protocol-buffers/
- //
 @@ -347,7 +347,7 @@ inline void InlinedStringField::Swap(
      InlinedStringField* from, const std::string* /*default_value*/,
      Arena* arena, bool donated, bool from_donated, uint32_t* donating_states,
@@ -115,15 +103,9 @@ index 1fe639f06..7dc7bce51 100644
    if (donated && !from_donated) {
      MutableSlow(arena, donated, donating_states, mask);
 diff --git a/src/google/protobuf/io/coded_stream.h b/src/google/protobuf/io/coded_stream.h
-index 45963ef86..9b31bec10 100644
+index 45963ef86..8af9e66e3 100644
 --- a/src/google/protobuf/io/coded_stream.h
 +++ b/src/google/protobuf/io/coded_stream.h
-@@ -1,4 +1,4 @@
--// Protocol Buffers - Google's data interchange format
-+﻿// Protocol Buffers - Google's data interchange format
- // Copyright 2008 Google Inc.  All rights reserved.
- // https://developers.google.com/protocol-buffers/
- //
 @@ -135,7 +135,11 @@
  #ifdef __APPLE__
  #include <machine/endian.h>  // __BYTE_ORDER
@@ -136,6 +118,55 @@ index 45963ef86..9b31bec10 100644
  #elif (defined(sun) || defined(__sun)) && (defined(__SVR4) || defined(__svr4__))
  #include <sys/isa_defs.h>  // __BYTE_ORDER
  #elif defined(_AIX) || defined(__TOS_AIX__)
+diff --git a/src/google/protobuf/io/io_win32.cc b/src/google/protobuf/io/io_win32.cc
+index ed8ab1973..eec926b06 100644
+--- a/src/google/protobuf/io/io_win32.cc
++++ b/src/google/protobuf/io/io_win32.cc
+@@ -42,8 +42,37 @@
+ //
+ // This file is only used on Windows, it's empty on other platforms.
+ 
+-#if defined(_WIN32) && !defined(_XBOX_ONE)
++#if defined(_WIN32)
++#if defined(_XBOX_ONE)
++#include <io.h>
++
++namespace google {
++namespace protobuf {
++namespace io {
++namespace win32 {
++
++int open(const char* path, int flags, int mode) {
++	return ::_open(path, flags, mode);
++}
++
++int read(int fd, void* buffer, size_t size) {
++	return ::_read(fd, buffer, size);
++}
++
++int write(int fd, const void* buffer, size_t size) {
++	return ::_write(fd, buffer, size);
++}
++
++int close(int fd) { 
++	return ::_close(fd); 
++}
++
++}  // namespace win32
++}  // namespace io
++}  // namespace protobuf
++}  // namespace google
+ 
++#else // defined(_XBOX_ONE)
+ // Comment this out to fall back to using the ANSI versions (open, mkdir, ...)
+ // instead of the Unicode ones (_wopen, _wmkdir, ...). Doing so can be useful to
+ // debug failing tests if that's caused by the long path support.
+@@ -467,4 +496,5 @@ bool wcs_to_utf8(const wchar_t* input, string* out) {
+ }  // namespace protobuf
+ }  // namespace google
+ 
++#endif  // defined(_XBOX_ONE)
+ #endif  // defined(_WIN32)
 diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
 index 003f75ac7..ff33eae6f 100644
 --- a/src/google/protobuf/port_def.inc
@@ -171,15 +202,9 @@ index 579eb419d..2f5b0bb7f 100644
  #pragma warning(pop)
  #endif
 diff --git a/src/google/protobuf/stubs/mutex.h b/src/google/protobuf/stubs/mutex.h
-index c4599913b..8768f15df 100644
+index c4599913b..ba60d02e9 100644
 --- a/src/google/protobuf/stubs/mutex.h
 +++ b/src/google/protobuf/stubs/mutex.h
-@@ -1,4 +1,4 @@
--// Copyright (c) 2006, Google Inc.
-+﻿// Copyright (c) 2006, Google Inc.
- // All rights reserved.
- //
- // Redistribution and use in source and binary forms, with or without
 @@ -132,7 +132,7 @@ class GOOGLE_PROTOBUF_CAPABILITY("mutex") PROTOBUF_EXPORT WrappedMutex {
   private:
  #if defined(GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP)
@@ -203,15 +228,9 @@ index 24799600d..f4a6878d9 100644
  // we use pthread_key_create()/pthread_getspecific()/... methods for
  // TLS support on android.
 diff --git a/src/google/protobuf/stubs/port.h b/src/google/protobuf/stubs/port.h
-index 045e25d89..5c94bfed7 100644
+index 045e25d89..fae51d9b3 100644
 --- a/src/google/protobuf/stubs/port.h
 +++ b/src/google/protobuf/stubs/port.h
-@@ -1,4 +1,4 @@
--// Protocol Buffers - Google's data interchange format
-+﻿// Protocol Buffers - Google's data interchange format
- // Copyright 2008 Google Inc.  All rights reserved.
- // https://developers.google.com/protocol-buffers/
- //
 @@ -60,7 +60,11 @@
  #ifdef __APPLE__
  #include <machine/endian.h>  // __BYTE_ORDER
@@ -239,3 +258,18 @@ index 045e25d89..5c94bfed7 100644
  #endif
  
  // Legacy: some users reference these (internal-only) macros even though we
+diff --git a/src/google/protobuf/util/time_util.h b/src/google/protobuf/util/time_util.h
+index 96b1aac46..bbfc4c27c 100644
+--- a/src/google/protobuf/util/time_util.h
++++ b/src/google/protobuf/util/time_util.h
+@@ -40,8 +40,8 @@
+ #ifdef _MSC_VER
+ #ifdef _XBOX_ONE
+ struct timeval {
+-  int64 tv_sec;  /* seconds */
+-  int64 tv_usec; /* and microseconds */
++  int64_t tv_sec;  /* seconds */
++  int64_t tv_usec; /* and microseconds */
+ };
+ #else
+ #include <winsock2.h>
