@@ -148,8 +148,8 @@ index ed8ab1973..eec926b06 100644
 +	return ::_write(fd, buffer, size);
 +}
 +
-+int close(int fd) { 
-+	return ::_close(fd); 
++int close(int fd) {
++	return ::_close(fd);
 +}
 +
 +}  // namespace win32
