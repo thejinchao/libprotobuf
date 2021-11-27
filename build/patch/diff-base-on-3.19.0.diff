@@ -1,5 +1,5 @@
 diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 51e8478f6..40df218fd 100644
+index 51e8478f6..48ceb7081 100644
 --- a/cmake/CMakeLists.txt
 +++ b/cmake/CMakeLists.txt
 @@ -24,7 +24,8 @@ endif()
@@ -45,6 +45,17 @@ index 51e8478f6..40df218fd 100644
    else()
      # In case we are building static libraries, link also the runtime library statically
      # so that MSVCR*.DLL is not required at runtime.
+@@ -247,6 +254,10 @@ if (MSVC)
+   configure_file(version.rc.in ${CMAKE_CURRENT_BINARY_DIR}/version.rc @ONLY)
+ endif (MSVC)
+ 
++if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
++  # Clang warning suppressions
++  add_definitions(-Wall -Werror -Wno-deprecated-register)
++endif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+ 
+ get_filename_component(protobuf_source_dir ${protobuf_SOURCE_DIR} PATH)
+ 
 diff --git a/src/google/protobuf/compiler/importer.cc b/src/google/protobuf/compiler/importer.cc
 index 3bcb0c90c..bb5207a20 100644
 --- a/src/google/protobuf/compiler/importer.cc
@@ -119,7 +130,7 @@ index 45963ef86..8af9e66e3 100644
  #include <sys/isa_defs.h>  // __BYTE_ORDER
  #elif defined(_AIX) || defined(__TOS_AIX__)
 diff --git a/src/google/protobuf/io/io_win32.cc b/src/google/protobuf/io/io_win32.cc
-index ed8ab1973..eec926b06 100644
+index ed8ab1973..4f75fc2fd 100644
 --- a/src/google/protobuf/io/io_win32.cc
 +++ b/src/google/protobuf/io/io_win32.cc
 @@ -42,8 +42,37 @@
