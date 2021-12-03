@@ -27,6 +27,16 @@ public class libprotobuf : ModuleRules
 			is_supported = true;
 			PublicAdditionalLibraries.Add(Path.Combine(protobufPath, "lib", "android", "libprotobuf.a"));
 		}
+		else if(Target.Platform == UnrealTargetPlatform.Mac)
+		{
+			is_supported = true;
+			PublicAdditionalLibraries.Add(Path.Combine(protobufPath, "lib", "mac", "libprotobuf.a"));
+		}
+		else if(Target.Platform == UnrealTargetPlatform.IOS)
+		{
+			is_supported = true;
+			PublicAdditionalLibraries.Add(Path.Combine(protobufPath, "lib", "ios", "libprotobuf.a"));
+		}
 
 		if (is_supported)
 		{

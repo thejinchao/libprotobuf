@@ -35,7 +35,8 @@ mkdir _win64 & cd _win64
 cmake -G "Visual Studio 16 2019" -A x64 ..\..\protobuf-source\cmake ^
  -DCMAKE_INSTALL_PREFIX=_install ^
  -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>DLL" ^
- -Dprotobuf_BUILD_TESTS=false -Dprotobuf_MSVC_STATIC_RUNTIME=false -Dprotobuf_WITH_ZLIB=false
+ -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false ^
+ -Dprotobuf_MSVC_STATIC_RUNTIME=false
  
 cmake --build . --target install --config Release
 ```
@@ -57,7 +58,7 @@ cmake --build . --target install --config Release
 ```
 
 ## 3. Android
-[Android Studio](https://developer.android.com/studio) is required. And you need install additional sdk and tools through `SDK Manager`. 
+[Android Studio](https://developer.android.com/studio) is required. And you need install other additional sdk and tools through `SDK Manager`. 
 * Android NDK: r21b(21.4.7075529)
 * Android SDK Build-Tools: 28.0.3
 * Android SDK Command-line Tools
@@ -79,7 +80,7 @@ mkdir _android & cd _android
 ```
 
 ## 4. PlayStation 4
-PS4(Orbis) is required.
+PS4 SDK(Orbis) is required.
 ```
 cd <prj_root>/build
 mkdir _ps4 & cd _ps4
@@ -104,6 +105,35 @@ mkdir _ps5 & cd _ps5
  -Dprotobuf_BUILD_EXAMPLES=false ^
  -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false ^
  -Dprotobuf_DISABLE_RTTI=true
+
+cmake --build . --target install --config Release
+```
+
+## 6. Mac
+Xcode and CMake are required.
+```
+cd <prj_root>/build
+mkdir _mac && cd _mac
+cmake -G "Unix Makefiles" ../../protobuf-source/cmake \
+ -DCMAKE_INSTALL_PREFIX=./_install \
+ -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false \
+ -Dprotobuf_BUILD_EXAMPLES=false \
+ -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false \
+ -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 
+ 
+cmake --build . --target install --config Release
+```
+## 7. iOS
+Xcode and CMake are required.
+```
+cd <prj_root>/build
+mkdir _ios && cd _ios
+cmake -G "Unix Makefiles" ../../protobuf-source/cmake \
+-DCMAKE_INSTALL_PREFIX=./_install \
+-DCMAKE_TOOLCHAIN_FILE=../ios/ios.toolchain.cmake -DPLATFORM=OS64 \
+ -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false \
+ -Dprotobuf_BUILD_EXAMPLES=false \
+ -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false 
 
 cmake --build . --target install --config Release
 ```
