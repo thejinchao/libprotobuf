@@ -23,7 +23,8 @@ Link the google's `protocol bufffers` library as the third party in [Unreal Engi
 # Build Library
 The environment variables required for compilation
 * `PB_LIBRARY_PATH` The directory where this document is located
-Apply the patch first
+
+## Apply the patch
 ```
 cd %PB_LIBRARY_PATH%\protobuf-source
 git apply ..\build\patch\diff-base-on-3.19.0.diff
