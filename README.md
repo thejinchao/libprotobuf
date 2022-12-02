@@ -5,7 +5,7 @@ Link the google's `protocol bufffers` library as the third party in [Unreal Engi
 
 # Version
 * [Protobuf][]: 3.19.0
-* [Unreal Engine 4][]: 4.27.1
+* [Unreal Engine 4][]: 4.27.2
 
 # Usage
 1. Import or copy the folder `libprotobuf` into `<your project>/Source/ThirdParty/libprotobuf`.
@@ -21,120 +21,144 @@ Link the google's `protocol bufffers` library as the third party in [Unreal Engi
 1. Include and use the header file(ex: Message.pb.h) in your `.cpp` file.
 
 # Build Library
+The environment variables required for compilation
+* `PB_LIBRARY_PATH` The directory where this document is located
+* `UE_THIRD_PARTY_PATH` UE third party source directory, This directory is located in a subdirectory `Engine/Source/ThirdParty` of the UE source directory
 Apply the patch first
 ```
-cd <prj_root>\protobuf-source
+cd %PB_LIBRARY_PATH%\protobuf-source
 git apply ..\build\patch\diff-base-on-3.19.0.diff
 ```
 
 ## 1. Windows
 [Visual Studio 2019](https://visualstudio.microsoft.com/) and [CMake][] are required
 ```
-cd <prj_root>/build
-mkdir _win64 & cd _win64
-cmake -G "Visual Studio 16 2019" -A x64 ..\..\protobuf-source\cmake ^
- -DCMAKE_INSTALL_PREFIX=_install ^
+mkdir %PB_LIBRARY_PATH%\build\_win64 & cd %PB_LIBRARY_PATH%\build\_win64
+cmake -G "Visual Studio 16 2019" -A x64 ^
+ -DCMAKE_INSTALL_PREFIX=%PB_LIBRARY_PATH%/libprotobuf ^
  -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>DLL" ^
  -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false ^
- -Dprotobuf_MSVC_STATIC_RUNTIME=false
- 
-cmake --build . --target install --config Release
+ -Dprotobuf_DEBUG_POSTFIX="" ^
+ -DCMAKE_INSTALL_LIBDIR="lib/win64/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>" ^
+ -DCMAKE_INSTALL_CMAKEDIR=lib/win64/cmake ^
+ -Dprotobuf_MSVC_STATIC_RUNTIME=false ^
+ %PB_LIBRARY_PATH%/protobuf-source/cmake
+cmake --build . --target INSTALL --config Debug
+cmake --build . --target INSTALL --config Release
 ```
+
 ## 2. Linux(Cross Compiling)
-[Clang cross-compile toolchain][], [Ninja][] and Unreal Engine Source Code are required
+[Clang cross-compile toolchain][], [Ninja][] and Unreal Engine Source Code are required, and make sure the following environment variables are set correctly
+* `LINUX_MULTIARCH_ROOT` The directory where you installed [Clang cross-compile toolchain][] for Linux
+* `NINJA_EXE_PATH` The file path of `ninja.exe`, [Ninja][] is a small build system with a focus on speed.
 ```
-cd <prj_root>/build
-mkdir _linux & cd _linux
-cmake -G "Ninja" ..\..\protobuf-source\cmake ^
- -DCMAKE_MAKE_PROGRAM=<ninja_install_path>\ninja.exe ^
- -DCMAKE_TOOLCHAIN_FILE="..\linux\ue4-linux-cross-compile.cmake" ^
- -DCMAKE_INSTALL_PREFIX=_install ^
- -DUE4_ENGINE_PATH=<ue4_source_path>\Engine ^
+mkdir %PB_LIBRARY_PATH%\build\_linux & cd %PB_LIBRARY_PATH%\build\_linux
+cmake -G "Ninja Multi-Config" -DCMAKE_MAKE_PROGRAM=%NINJA_EXE_PATH% ^
+ -DCMAKE_TOOLCHAIN_FILE="%PB_LIBRARY_PATH%\build\linux\ue4-linux-cross-compile.cmake" ^
+ -DUE_THIRD_PARTY_PATH=%UE_THIRD_PARTY_PATH% -Dprotobuf_DEBUG_POSTFIX="" ^
+ -DCMAKE_INSTALL_PREFIX=%PB_LIBRARY_PATH%/libprotobuf ^
+ -DCMAKE_INSTALL_LIBDIR="lib/linux/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>" ^
+ -DCMAKE_INSTALL_CMAKEDIR=lib/linux/cmake ^
  -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false ^
  -Dprotobuf_BUILD_EXAMPLES=false ^
- -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false
-
+ -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false ^
+ %PB_LIBRARY_PATH%/protobuf-source/cmake
+cmake --build . --target install --config Debug
 cmake --build . --target install --config Release
 ```
 
 ## 3. Android
 [Android Studio](https://developer.android.com/studio) is required. And you need install other additional sdk and tools through `SDK Manager`. 
-* Android NDK: r21b(21.4.7075529)
-* Android SDK Build-Tools: 28.0.3
+* Android NDK
+* Android SDK Build-Tools
 * Android SDK Command-line Tools
 * CMake
-
-Obtaining the correct component version is important. you can get the version info from this file: `Engine\Extras\Android\SetupAndroid.bat`
+make sure the following environment variables are set correctly
+* `ANDROID_HOME` The directory where you installed the Android SDK, It must contain a directory called `platform-tools`.
+* `NDKROOT` The directory where you unzipped the Android NDK, It must contain a file called `ndk-build.cmd`
+* `NDK_CMAKE_VERSION` The version number of cmake that comes with the Android NDK, like `3.22.1`(Must later than 3.18)
 ```
-cd <prj_root>/build
-mkdir _android & cd _android
-"%ANDROID_HOME%\cmake\X.XX.X\bin\cmake.exe" -G "Ninja" ..\..\protobuf-source\cmake ^
- -DCMAKE_INSTALL_PREFIX=_install ^
- -DCMAKE_TOOLCHAIN_FILE="%NDK_ROOT%\build\cmake\android.toolchain.cmake" ^
- -DCMAKE_MAKE_PROGRAM=%ANDROID_HOME%\cmake\X.XX.X\bin\ninja.exe ^
+mkdir %PB_LIBRARY_PATH%\build\_android & cd %PB_LIBRARY_PATH%\build\_android
+for /d %a in (armeabi-v7a arm64-v8a x86_64) do (
+mkdir %a & pushd %a ^
+ & "%ANDROID_HOME%\cmake\%NDK_CMAKE_VERSION%\bin\cmake.exe" -G "Ninja Multi-Config" ^
+ -DCMAKE_TOOLCHAIN_FILE="%NDKROOT%\build\cmake\android.toolchain.cmake" ^
+ -DCMAKE_MAKE_PROGRAM=%ANDROID_HOME%\cmake\%NDK_CMAKE_VERSION%\bin\ninja.exe ^
+ -DANDROID_ABI=%a -Dprotobuf_DEBUG_POSTFIX="" ^
+ -DCMAKE_INSTALL_PREFIX=%PB_LIBRARY_PATH%/libprotobuf ^
+ -DCMAKE_INSTALL_LIBDIR="lib/android/%a/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>" ^
+ -DCMAKE_INSTALL_CMAKEDIR=lib/android/%a/cmake ^
  -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false ^
- -Dprotobuf_BUILD_EXAMPLES=false ^
- -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false
-
-"%ANDROID_HOME%\cmake\X.XX.X\bin\cmake.exe" --build . --target install --config Release
+ -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false ^
+ %PB_LIBRARY_PATH%/protobuf-source/cmake ^
+ & "%ANDROID_HOME%\cmake\%NDK_CMAKE_VERSION%\bin\cmake.exe" --build . --target install --config Debug ^
+ & "%ANDROID_HOME%\cmake\%NDK_CMAKE_VERSION%\bin\cmake.exe" --build . --target install --config Release ^
+ & popd
+)
 ```
 
 ## 4. PlayStation 4
 PS4 SDK(Orbis) is required.
 ```
-cd <prj_root>/build
-mkdir _ps4 & cd _ps4
-"%SCE_ROOT_DIR%\ORBIS\Tools\CMake\PS4CMake.bat" ..\..\protobuf-source\cmake ^
- -DCMAKE_INSTALL_PREFIX=_install ^
+mkdir %PB_LIBRARY_PATH%\build\_ps4 & cd %PB_LIBRARY_PATH%\build\_ps4
+"%SCE_ROOT_DIR%\ORBIS\Tools\CMake\PS4CMake.bat" ^
+ -DCMAKE_INSTALL_PREFIX=%PB_LIBRARY_PATH%/libprotobuf ^
+ -DCMAKE_INSTALL_LIBDIR="lib/ps4/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>" ^
+ -DCMAKE_INSTALL_CMAKEDIR=lib/ps4/cmake -DCMAKE_CXX_STANDARD=14 ^
  -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false ^
  -Dprotobuf_BUILD_EXAMPLES=false ^
  -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false ^
- -Dprotobuf_DISABLE_RTTI=true
-
-cmake --build . --target install --config Release
+ -Dprotobuf_DISABLE_RTTI=true ^
+ %PB_LIBRARY_PATH%/protobuf-source/cmake
+cmake --build . --target INSTALL --config Debug
+cmake --build . --target INSTALL --config Release
 ```
 
 ## 5. PlayStation 5
 PS5 SDK(Prospero) is required.
 ```
-cd <prj_root>/build
-mkdir _ps5 & cd _ps5
-"%SCE_ROOT_DIR%\Prospero\Tools\CMake\PS5CMake.bat" ..\..\protobuf-source\cmake ^
- -DCMAKE_INSTALL_PREFIX=_install ^
+mkdir %PB_LIBRARY_PATH%\build\_ps5 & cd %PB_LIBRARY_PATH%\build\_ps5
+"%SCE_ROOT_DIR%\Prospero\Tools\CMake\PS5CMake.bat" ^
+ -DCMAKE_INSTALL_PREFIX=%PB_LIBRARY_PATH%/libprotobuf ^
+ -DCMAKE_INSTALL_LIBDIR="lib/ps5/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>" ^
+ -DCMAKE_INSTALL_CMAKEDIR=lib/ps5/cmake -DCMAKE_CXX_STANDARD=14 ^
  -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false ^
  -Dprotobuf_BUILD_EXAMPLES=false ^
  -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false ^
- -Dprotobuf_DISABLE_RTTI=true
-
-cmake --build . --target install --config Release
+ -Dprotobuf_DISABLE_RTTI=true ^
+ %PB_LIBRARY_PATH%/protobuf-source/cmake
+cmake --build . --target INSTALL --config Debug
+cmake --build . --target INSTALL --config Release
 ```
 
 ## 6. Mac
 Xcode and CMake are required.
 ```
-cd <prj_root>/build
-mkdir _mac && cd _mac
-cmake -G "Unix Makefiles" ../../protobuf-source/cmake \
- -DCMAKE_INSTALL_PREFIX=./_install \
+mkdir -p $PB_LIBRARY_PATH/build/_mac && cd $PB_LIBRARY_PATH/build/_mac
+cmake -G "Unix Makefiles" \
+ -DCMAKE_INSTALL_PREFIX=$PB_LIBRARY_PATH/libprotobuf \
+ -DCMAKE_INSTALL_LIBDIR=lib/mac -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+ -DCMAKE_INSTALL_CMAKEDIR=lib/mac/cmake -DCMAKE_CXX_STANDARD=14 \
  -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false \
  -Dprotobuf_BUILD_EXAMPLES=false \
  -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false \
- -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 
- 
+ $PB_LIBRARY_PATH/protobuf-source/cmake
 cmake --build . --target install --config Release
 ```
+
 ## 7. iOS
 Xcode and CMake are required.
 ```
-cd <prj_root>/build
-mkdir _ios && cd _ios
-cmake -G "Unix Makefiles" ../../protobuf-source/cmake \
--DCMAKE_INSTALL_PREFIX=./_install \
--DCMAKE_TOOLCHAIN_FILE=../ios/ios.toolchain.cmake -DPLATFORM=OS64 \
+mkdir -p $PB_LIBRARY_PATH/build/_ios && cd $PB_LIBRARY_PATH/build/_ios
+cmake -G "Unix Makefiles" \
+ -DCMAKE_INSTALL_PREFIX=$PB_LIBRARY_PATH/libprotobuf \
+ -DCMAKE_TOOLCHAIN_FILE=$PB_LIBRARY_PATH/build/ios/ios.toolchain.cmake \
+ -DCMAKE_INSTALL_LIBDIR=lib/ios -DPLATFORM=OS64 \
+ -DCMAKE_INSTALL_CMAKEDIR=lib/ios/cmake -DCMAKE_CXX_STANDARD=17 \
  -Dprotobuf_BUILD_TESTS=false -Dprotobuf_WITH_ZLIB=false \
  -Dprotobuf_BUILD_EXAMPLES=false \
- -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false 
-
+ -Dprotobuf_BUILD_PROTOC_BINARIES=false -Dprotobuf_BUILD_LIBPROTOC=false \
+ $PB_LIBRARY_PATH/protobuf-source/cmake
 cmake --build . --target install --config Release
 ```
 

@@ -56,6 +56,22 @@ index 51e8478f6..48ceb7081 100644
  
  get_filename_component(protobuf_source_dir ${protobuf_SOURCE_DIR} PATH)
  
+diff --git a/cmake/install.cmake b/cmake/install.cmake
+index 4e1c5deb3..a209c19df 100644
+--- a/cmake/install.cmake
++++ b/cmake/install.cmake
+@@ -26,6 +26,11 @@ foreach(_library ${_protobuf_libraries})
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${_library}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${_library}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${_library})
++  if(WIN32)
++    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Debug/${_library}.pdb
++       DESTINATION ${CMAKE_INSTALL_LIBDIR}
++       CONFIGURATIONS Debug)
++  endif()
+ endforeach()
+ 
+ if (protobuf_BUILD_PROTOC_BINARIES)
 diff --git a/src/google/protobuf/compiler/importer.cc b/src/google/protobuf/compiler/importer.cc
 index 3bcb0c90c..bb5207a20 100644
 --- a/src/google/protobuf/compiler/importer.cc
