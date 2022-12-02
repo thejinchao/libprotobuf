@@ -23,7 +23,6 @@ Link the google's `protocol bufffers` library as the third party in [Unreal Engi
 # Build Library
 The environment variables required for compilation
 * `PB_LIBRARY_PATH` The directory where this document is located
-* `UE_THIRD_PARTY_PATH` UE third party source directory, This directory is located in a subdirectory `Engine/Source/ThirdParty` of the UE source directory
 Apply the patch first
 ```
 cd %PB_LIBRARY_PATH%\protobuf-source
@@ -49,6 +48,7 @@ cmake --build . --target INSTALL --config Release
 
 ## 2. Linux(Cross Compiling)
 [Clang cross-compile toolchain][], [Ninja][] and Unreal Engine Source Code are required, and make sure the following environment variables are set correctly
+* `UE_THIRD_PARTY_PATH` UE third party source directory, This directory is located in a subdirectory `Engine/Source/ThirdParty` of the UE source directory
 * `LINUX_MULTIARCH_ROOT` The directory where you installed [Clang cross-compile toolchain][] for Linux
 * `NINJA_EXE_PATH` The file path of `ninja.exe`, [Ninja][] is a small build system with a focus on speed.
 ```
