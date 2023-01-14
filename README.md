@@ -42,6 +42,7 @@ cmake -G "Visual Studio 16 2019" -A x64 ^
  -DCMAKE_INSTALL_LIBDIR="lib/win64/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>" ^
  -DCMAKE_INSTALL_CMAKEDIR=lib/win64/cmake ^
  -Dprotobuf_MSVC_STATIC_RUNTIME=false ^
+ -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL ^
  %PB_LIBRARY_PATH%/protobuf-source/cmake
 cmake --build . --target INSTALL --config Debug
 cmake --build . --target INSTALL --config Release
